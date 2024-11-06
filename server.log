@@ -1,0 +1,69 @@
+[2024-11-07 00:40:30] Started listening on 192.168.0.104:3169
+[2024-11-07 00:40:30] Started listening on 192.168.0.104:3170
+[2024-11-07 00:40:30] Started listening on 192.168.0.104:3171
+[2024-11-07 00:40:30] 0 users in the room. Timeout: 20, TEST1 room, <socket.socket fd=860, family=2, type=1, proto=0, laddr=('192.168.0.104', 3170)>
+[2024-11-07 00:40:30] 0 users in the room. Timeout: 0, general room, <socket.socket fd=856, family=2, type=1, proto=0, laddr=('192.168.0.104', 3171)>
+[2024-11-07 00:40:50] Room TEST1 is empty, closing it.
+[2024-11-07 00:45:00] LOBBY: Connection established with ('192.168.0.104', 59937)
+[2024-11-07 00:45:00] Lobby received: {'action': 'list'}
+[2024-11-07 00:45:02] ROOM: Connection established with ('192.168.0.104', 59940)
+[2024-11-07 00:45:02] Public key sent to client.
+[2024-11-07 00:45:02] Received raw data: b'\x1d\xfek}-\x08\xe9\xec\xb2T\xe0\xf8z\x17*\xc6Uro\xb2\xb7\xcf\xb0\xed\xf3W\x13\x98\x05\xcf\xae\xeb\xf3\xbdI"\x94\x009+6\xff\x99\x97\x02e\xad\xbc\xbc\x0c\x1a\xb3\xb7\xba\xa5?W\xd0\x12J\xdb\x92\xb9Z\xa5.\xdfk\xef\xc8iM\x8a7\xf6\x83w%=\xccSM\x0b\x02>\x86\x18Q\x9d\xefk:M[\xab{`L\x9eb9\xe8\x12%U\x8a\xf3Q\xbd\xbf\ncI\x0eK\x12\x1c\x8c\x1b\x1aw\x02\xd5\xd4<G\xda].\x88L\xfa\x8a\xbeo\x81=\xd5V\xae\xf8\x1fG.\x89\xf1\x12N\xa6\xed\xad\x9e-\x01_hB\xcb)\tJJ\xcbm\x8fD\xbb\x1f\xba\xcc\xf43Z\xf5\xe7h\xff\xc19\x90D\xc1\n\x97\x9a\t\x99@\xabc\xe9\xc8\x12\xeaF\xf3\xac\xa8\xf91\xaa\xd8\x9c\xee\t\xf7\x94\xb4\xe5}\xed\xd5tR\x04d\x93\x12\x12\xa47o#A\xe8V\xeb\xbf\x1d\xcax\xc9H\ncv\x1a)\x8c\xce\x12\xb3\x19\x82\x94\xb0sJ\xcdst\x8c"\x80\xff\x84'
+[2024-11-07 00:45:02] Decrypted key: b'CZKi8rXz2bQjbQmvjAmqKTQRcfn7yZtqOUjJUxsQF7s='
+[2024-11-07 00:45:02] Key received: <cryptography.fernet.Fernet object at 0x000001C44037F410>
+[2024-11-07 00:45:05] Received raw data: b'gAAAAABnK9VRP-nma2I98vh0y2_ZOiimpDnBV7eUxlUYX5_ujl0-FZbLXiuwHh_9oTvMZNt5lQw8A9QHPqPNHew9KCGvlaspwD4bxjU184ZfTHNqI8T2R0tse1hm6rEUGoeslAttlgpOSuIMup34NA8T1sDLN61M6w8b3ldPEc9cw8vwdtiFI35Yn6DeF9ULa3hKOFFmO188'
+[2024-11-07 00:45:05] Decrypted data: b'{"action": "join", "user_id": "36335506-39fd-4270-908c-0f36be5e69bf", "username": "natiq"}'
+[2024-11-07 00:45:05] Room general received a request: {'action': 'join', 'user_id': '36335506-39fd-4270-908c-0f36be5e69bf', 'username': 'natiq'}
+[2024-11-07 00:45:05] Room general broadcasting message: User natiq joined the room!
+[2024-11-07 00:46:02] Started listening on 192.168.0.104:3169
+[2024-11-07 00:46:02] Started listening on 192.168.0.104:3170
+[2024-11-07 00:46:02] Started listening on 192.168.0.104:3171
+[2024-11-07 00:46:02] 0 users in the room. Timeout: 20, TEST1 room, <socket.socket fd=900, family=2, type=1, proto=0, laddr=('192.168.0.104', 3170)>
+[2024-11-07 00:46:02] 0 users in the room. Timeout: 0, general room, <socket.socket fd=712, family=2, type=1, proto=0, laddr=('192.168.0.104', 3171)>
+[2024-11-07 00:46:22] Room TEST1 is empty, closing it.
+[2024-11-07 00:46:38] LOBBY: Connection established with ('192.168.0.104', 60001)
+[2024-11-07 00:46:38] Lobby received: {'action': 'list'}
+[2024-11-07 00:46:41] ROOM: Connection established with ('192.168.0.104', 60002)
+[2024-11-07 00:46:41] Public key sent to client.
+[2024-11-07 00:46:41] Received raw data: b'2k\xca\xc4\xf4sU\x99\xa4\xf1\x93\x05\xbc\x18D\x94\x0eq&6\x8bz\xe9\xe7b}T\xacy\x8c\xc7\x84\x93\x8bN,3]\x01/\xf1W,\xdc\xa9X%\xa2$\x10\xfc\xf0d\xde{\xfeAH\x92*\x83At\x8c\x1b\x1c\xfc\xe0 \xa9\x06?<\xde\x04~l\x06#6/\xdb\x08%w4\xa3N\xbc\'(\x18@i\xec\xc5R\x0b#\xe5\x11\x9d\xef0eD\xad?]\x859\xb6\xfc\x05\xd2\x83U\x17\x17\t\x9ef\x98=T\x8cO7j}/l\xb1\x8bK\xc1\n\xe1\xbb\xab\x95\xa2\xc5c\xdc\x04\xc2\xc0\x9d\xa1wki~\xf8\xa3\xac\x1b\xf4e\xc1R\xa0\xbbd\x82\x0f*P\x02~ \xbe\xd2\xca\xe2\x82\xceF\xee\xdc\x80\x935o\xe1\xa4=\xacT\xe6\xbb\xd6Y\xd9\x01\x02$\xd7\xbe\xf8@D\x9c\x1f\xf4\xcf\xee\xd6\x1b\xb7\xb3\xfc2:"\xa0\xb8\xe6S&B\xe2\x05l\xc8\xdc\xc7\xec6.\xff/\xc3\x81f(\x88\x9e~\xf0a\x16\xe7\x88\xbf\x0b]\xd4X\x8fMr\xb0\xa7\xa7'
+[2024-11-07 00:46:41] Decrypted key: b'V5M_pg10_Nrb03C8JKBhAISAtklh1ndFehxTp4gew4s='
+[2024-11-07 00:46:41] Key received: <cryptography.fernet.Fernet object at 0x000001EDE29F9A00>
+[2024-11-07 00:46:43] Received raw data: b'gAAAAABnK9Wz6K0nUx1DN65AP1QTgiUUbQhcbWQACLpH4rEJqiUyF-ESoiGTK5aTCZ7uNNdL09lWouS31jxDYuyoeHUXpTKoFW7x9IIToGGWKXJYM1US5s1liwE82wgsUiZHB96rvjBfii2jJsPXuye2SAbJ94ZIcwmd_1_ilYnip7kZes1vNrqtynDt6k5n-JAqpnyggswM'
+[2024-11-07 00:46:43] Decrypted data: b'{"action": "join", "user_id": "e0fa27ef-b0cc-42d4-bdc7-70082e3a9ef7", "username": "natiq"}'
+[2024-11-07 00:46:43] Room general received a request: {'action': 'join', 'user_id': 'e0fa27ef-b0cc-42d4-bdc7-70082e3a9ef7', 'username': 'natiq'}
+[2024-11-07 00:46:43] Room general broadcasting message: User natiq joined the room!
+[2024-11-07 00:46:51] Received raw data: b'gAAAAABnK9W7YHJRKXAk8NlaczSv6LIGAYeCpoaKVEeojXVmONkNokzRuALyGzyF36jL63EpGDX3y1ZpwPUXdsbuoQ-ybSZgrAhXlfKT0fv7KU71MtST9msa-QpuiRPzTTr87X1XFoVD'
+[2024-11-07 00:46:51] Decrypted data: b'{"action": "send_message", "message": "baxaq"}'
+[2024-11-07 00:46:51] Room general received a request: {'action': 'send_message', 'message': 'baxaq'}
+[2024-11-07 00:46:51] Room general broadcasting message: natiq: baxaq
+[2024-11-07 00:46:55] Received raw data: b'gAAAAABnK9W_QWrNus0qzy8ZixQQT6fXEal3O5gSoF9Qt5XBsASVk9cgnOfDAwOVDQ3WnTPbdv6RW4YHx75hp1-3HzQsd80R6Bl_DCbPgIRYv3w4CfFXqz-6jadgFf9ej-4klLviuHT7'
+[2024-11-07 00:46:55] Decrypted data: b'{"action": "send_message", "message": "neee"}'
+[2024-11-07 00:46:55] Room general received a request: {'action': 'send_message', 'message': 'neee'}
+[2024-11-07 00:46:55] Room general broadcasting message: natiq: neee
+[2024-11-07 00:47:08] Received raw data: b'gAAAAABnK9XMkqtLo8Eh3FG3eFoCUBL_F3rKl0Lsh0uAgyaRrzuq4WeEeovzBenYKKiySPzHttQbPG6ai8F5ZZkDs0FEC0cYzjsDcMEYns-shndfqq11tuKY7Vq2gNiQQXXqKhr6VHwYECVci4JcSs1wJcN5sH26ngenisX0n97I0aWCnQm4c2c='
+[2024-11-07 00:47:08] Decrypted data: b'{"action": "send_message", "message": "dont beleive me just watch"}'
+[2024-11-07 00:47:08] Room general received a request: {'action': 'send_message', 'message': 'dont beleive me just watch'}
+[2024-11-07 00:47:08] Room general broadcasting message: natiq: dont beleive me just watch
+[2024-11-07 00:49:12] Started listening on 192.168.0.104:3169
+[2024-11-07 00:49:12] Started listening on 192.168.0.104:3170
+[2024-11-07 00:49:12] Started listening on 192.168.0.104:3171
+[2024-11-07 00:49:12] 0 users in the room. Timeout: 20, TEST1 room, <socket.socket fd=904, family=2, type=1, proto=0, laddr=('192.168.0.104', 3170)>
+[2024-11-07 00:49:12] 0 users in the room. Timeout: 0, general room, <socket.socket fd=928, family=2, type=1, proto=0, laddr=('192.168.0.104', 3171)>
+[2024-11-07 00:49:32] Room TEST1 is empty, closing it.
+[2024-11-07 00:49:58] LOBBY: Connection established with ('192.168.0.104', 60102)
+[2024-11-07 00:49:58] Lobby received: {'action': 'list'}
+[2024-11-07 00:50:06] Started listening on 192.168.0.104:3169
+[2024-11-07 00:50:06] Started listening on 192.168.0.104:3170
+[2024-11-07 00:50:06] Started listening on 192.168.0.104:3171
+[2024-11-07 00:50:06] 0 users in the room. Timeout: 20, TEST1 room, <socket.socket fd=876, family=2, type=1, proto=0, laddr=('192.168.0.104', 3170)>
+[2024-11-07 00:50:06] 0 users in the room. Timeout: 0, general room, <socket.socket fd=892, family=2, type=1, proto=0, laddr=('192.168.0.104', 3171)>
+[2024-11-07 00:50:42] Started listening on 192.168.0.104:3169
+[2024-11-07 00:50:42] Started listening on 192.168.0.104:3170
+[2024-11-07 00:50:42] Started listening on 192.168.0.104:3171
+[2024-11-07 00:50:42] 0 users in the room. Timeout: 20, TEST1 room, <socket.socket fd=776, family=2, type=1, proto=0, laddr=('192.168.0.104', 3170)>
+[2024-11-07 00:50:42] 0 users in the room. Timeout: 0, general room, <socket.socket fd=764, family=2, type=1, proto=0, laddr=('192.168.0.104', 3171)>
+[2024-11-07 00:50:49] LOBBY: Connection established with ('192.168.0.104', 60133)
+[2024-11-07 00:50:49] Lobby received: {'action': 'list'}
+[2024-11-07 00:51:02] Room TEST1 is empty, closing it.
+[2024-11-07 00:51:27] LOBBY: Connection established with ('192.168.0.104', 60150)
+[2024-11-07 00:51:27] Lobby received: {'action': 'list'}
