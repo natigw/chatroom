@@ -31,14 +31,26 @@ def create_socket(port):
     log(f"Started listening on {host}:{s.getsockname()[1]}")
     return s
 
-def log(message):
-    open(file="server.log", mode="a").write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {message}\n")
-    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {message}")
-
-
 # GLOBAL VARIABLES
-clients = []
+try:
+    with open("users.json", "r") as file:
+        _users = json.load(file)  # Initialize _users by loading from the file if it exists
+except (FileNotFoundError, json.JSONDecodeError):
+    _users = {}                   # Initialize as empty if file is missing or invalid
+
 _rooms = {
+    "general": {
+        "room_name": "General",
+        "room_welcome_message": "WELCOME TO THE GENERAL ROOM, ENJOY, NO RULES :D",
+        "room_id": "general",
+        "room_owner": "admin",
+        "room_password": "",
+        "room_type": "public",
+        "room_port": 3170,
+        "room_timeout": 0,
+        "users": {},  # "4124" : {"user_id": "4124", "username": "farid123", "socket": socket}
+        "messages": []
+    },
     "TEST1": {
         "room_name": "some name chosen by admin",
         "room_welcome_message": "WELCOME TO MY VERY FIRST ROOM, ENJOY, NO RULES :D",
@@ -46,26 +58,37 @@ _rooms = {
         "room_owner": "admin username",
         "room_password": "123",
         "room_type": "private",
-        "room_port": 3170,
+        "room_port": 3171,
         "room_timeout": 20,
         "users": {},  # "4124" : {"user_id": "4124", "username": "farid123", "socket":socket}
-        "messages": []
-    },
-    "general": {
-        "room_name": "some name chosen by admin",
-        "room_welcome_message": "WELCOME TO MY VERY FIRST ROOM, ENJOY, NO RULES :D",
-        "room_id": "general",
-        "room_owner": "admin username",
-        "room_password": "",
-        "room_type": "public",
-        "room_port": 3171,
-        "room_timeout": 0,
-        "users": {},  # "4124" : {"user_id": "4124", "username": "farid123", "socket": socket}
         "messages": []
     }
 }
 
+#add a new user, if exists update it
+def add_user(user_data):
+    #user_data = {"natig": {"username": "natig", "password": "123", "date_joined": time.strftime('%Y-%m-%d %H:%M:%S')}}
+    global _users
+    _users.update(user_data)
+    with open("users.json", "w") as file:
+        json.dump(_users, file, indent=4)
+    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {user_data} added.")
+
+# _users = {
+#     "user_id1" : {
+#         "username" : "<USERNAME>", #unique,lowercased
+#         "password" : "<PASSWORD>",
+#         "date_joined" : "<DATE>"
+#     }
+# }
+
+
 available_commands = ["help - Show all commands | username - Change your username"]
+
+
+def log(message):
+    open(file="server.log", mode="a").write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {message}\n")
+    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {message}")
 
 
 def get_rooms():
@@ -86,14 +109,29 @@ def get_rooms():
         })
     return mapped_list
 
+def get_users():
+    return [
+        {
+            "username": data["username"],
+            "password": data["password"],
+            "date_joined": data["date_joined"]
+        }
+        for data in _users.values()
+    ]
+
 
 # rooms = [{"room_name":"Farid's room 1", "room_id":"TEST1", "room_owner":"faridg", "is_private": False, "room_port": 3170}, {"room_name":"Farid's room special", "room_id":"FARIDG", "room_owner":"faridg", "is_private": False, "room_port": 3171}]
 server_lobby_socket = create_socket(3169)
 
 
 def list_rooms(client_socket):
-    # { "code": 200,  "message":"list success", "data":[{"room_name":"Farid's room", "id":"room's id", "owner":"farid_admin0"}, {}, {}]}
-    response = {"code": 200, "message": "list success", "data": get_rooms()}
+    # { "code": 200,  "message":"list rooms success", "data":[{"room_name":"Farid's room", "id":"room's id", "owner":"farid_admin0"}, {}, {}]}
+    response = {"code": 200, "message": "list rooms success", "data": get_rooms()}
+    client_socket.sendall(json.dumps(response).encode('utf-8'))
+
+def list_users(client_socket):
+    # { "code": 200,  "message":"list users success", "data":[{"username":"natig" #(lowercased), "password":"1234"}, {}, {}]}
+    response = {"code": 200, "message": "list users success", "data": get_users()}
     client_socket.sendall(json.dumps(response).encode('utf-8'))
 
 
@@ -106,12 +144,28 @@ def lobby_client_handler(client_socket):
         request = json.loads(data.decode('utf-8'))
         log(f"Lobby received: {request}")
         # identify request type
-        if request["action"] == "list":
+        if request["action"] == "list_users":
+            list_users(client_socket)
+        elif request["action"] == "add_user":
+            add_user(request)
+        # elif request["action"] == "login":
+        #     login_user(request)
+        elif request["action"] == "list_rooms":
             list_rooms(client_socket)
         elif request["action"] == "create":
             admin_create_room(request)
         elif request["action"] == "delete":
             admin_delete_room(request)
+
+# def login_user(request):
+#     username = request["username"]
+#     password = request["password"]
+#     if username == _users[username]["username"] and _users[username]["password"] == password:
+#         # { "code": 200,  "message":"list rooms success", "data":[{"room_name":"Farid's room", "id":"room's id", "owner":"farid_admin0"}, {}, {}]}
+#         response = {"code": 200, "message": "list rooms success", "data": get_rooms()}
+#         client_socket.sendall(json.dumps(response).encode('utf-8'))
+#         log(f"{username} logged in")
+#     else
 
 
 def admin_create_room(request):
@@ -176,6 +230,77 @@ def receive_encrypted_data(data, fernet):
     return decrypted_data
 
 
+
+def user_client_handler(user_id, client_socket):
+    # Send public key to client once connected!
+    client_socket.sendall(public_key_pem)
+    log("Public key sent to client.")
+
+    user = _users[user_id]
+    this_client_id: str
+    last_received_raw_data = None
+    fernet = None
+    while True:
+        try:
+            request = json.loads(receive_encrypted_data(last_received_raw_data, fernet).decode('utf-8'))
+            log(f"User {user_id} received a request: {request}")
+            # identify request type
+            if request["action"] == "add_user":
+                add_user(request)
+
+        except Exception:
+            # If it is not json, then it is an encryption key
+            if not last_received_raw_data:
+                pass
+            else:
+                # Receive encrypted key from client
+                encrypted_message = last_received_raw_data
+                # Decrypt message with private key
+                key = private_key.decrypt(
+                    encrypted_message,
+                    padding.OAEP(
+                        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                        algorithm=hashes.SHA256(),
+                        label=None
+                    )
+                )
+                log(f"Decrypted key: {key}")
+                fernet = Fernet(key)
+                log(f"Key received: {fernet}")
+
+
+def unlock(request, fernet, client_socket):
+    if request["room_password"] == room["room_password"]:
+        body = {"code": 200, "message": "Password is valid"}
+    else:
+        body = {"code": 401, "message": "Invalid password!"}
+    send_request_encrypted(json.dumps(body).encode('utf-8'), fernet, client_socket)
+    # client_socket.sendall(json.dumps(body).encode('utf-8'))
+
+def join(request, fernet, client_socket):
+    username = request["username"]
+    username_exists = False
+    for user in room["users"].values():
+        if user["username"] == username:
+            body = {"code": 400, "message": "Username already exists!"}
+            log("Username exists!!!")
+            send_request_encrypted(json.dumps(body).encode('utf-8'), fernet, client_socket)
+            username_exists = True
+            break
+    # if username_exists:
+    #     continue
+    this_client_id = request["user_id"]
+    room["users"][request["user_id"]] = {"user_id": this_client_id, "username": request["username"],
+                                         "socket": client_socket, "fernet": fernet}
+    body = {"code": 200, "message": "join success", "room_welcome_message": room["room_welcome_message"]}
+    send_request_encrypted(json.dumps(body).encode('utf-8'), fernet, client_socket)
+    body = {"code": 200, "messages": room["messages"]}
+    send_request_encrypted(json.dumps(body).encode('utf-8'), fernet, client_socket)
+    # client_socket.sendall(json.dumps(body).encode('utf-8'))
+    # Broadcast the message to others about the user's join (client itself excluded)
+    broadcast_message(room, this_client_id, f'User {request["username"]} joined the room!')
+
+
 def room_client_handler(room_id, client_socket, room_socket):
     # Send public key to client once connected!
     client_socket.sendall(public_key_pem)
@@ -201,35 +326,9 @@ def room_client_handler(room_id, client_socket, room_socket):
             log(f"Room {room_id} received a request: {request}")
             # identify request type
             if request["action"] == "unlock":
-                if request["room_password"] == room["room_password"]:
-                    body = {"code": 200, "message": "Password is valid"}
-                else:
-                    body = {"code": 401, "message": "Invalid password!"}
-                send_request_encrypted(json.dumps(body).encode('utf-8'), fernet, client_socket)
-                # client_socket.sendall(json.dumps(body).encode('utf-8'))
+                unlock(request, fernet, client_socket)
             elif request["action"] == "join":
-                username = request["username"]
-                username_exists = False
-                for user in room["users"].values():
-                    if user["username"] == username:
-                        body = {"code": 400, "message": "Username already exists!"}
-                        log("Username exists!!!")
-                        send_request_encrypted(json.dumps(body).encode('utf-8'), fernet, client_socket)
-                        username_exists = True
-                        break
-                if username_exists:
-                    continue
-                this_client_id = request["user_id"]
-                room["users"][request["user_id"]] = {"user_id": this_client_id, "username": request["username"],
-                                                     "socket": client_socket, "fernet": fernet}
-                body = {"code": 200, "message": "join success", "room_welcome_message": room["room_welcome_message"]}
-                send_request_encrypted(json.dumps(body).encode('utf-8'), fernet, client_socket)
-                body = {"code": 200, "messages": room["messages"]}
-                send_request_encrypted(json.dumps(body).encode('utf-8'), fernet, client_socket)
-                # client_socket.sendall(json.dumps(body).encode('utf-8'))
-                # Broadcast the message to others about the user's join (client itself excluded)
-                broadcast_message(room, this_client_id, f'User {request["username"]} joined the room!')
-
+                join(request, fernet, client_socket)
             elif request["action"] == "send_message":
                 # Broadcast the message to others (client itself excluded)
                 broadcast_message(room, this_client_id,
@@ -284,6 +383,116 @@ def room_client_handler(room_id, client_socket, room_socket):
                 fernet = Fernet(key)
                 log(f"Key received: {fernet}")
 
+
+# def room_client_handler(room_id, client_socket, room_socket):
+#     # Send public key to client once connected!
+#     client_socket.sendall(public_key_pem)
+#     log("Public key sent to client.")
+#
+#     room = _rooms[room_id]
+#     this_client_id: str
+#     last_received_raw_data = None
+#     fernet = None
+#     while True:
+#         try:
+#             # receive request
+#             try:
+#                 last_received_raw_data = client_socket.recv(4096)
+#             except ConnectionResetError:
+#                 client_socket.close()
+#                 broadcast_message(room, this_client_id, f"User {room[this_client_id]['username']} left the room!")
+#                 del room["users"][this_client_id]
+#                 room_timeout_handler(room_id, room_socket, room["room_timeout"])
+#                 break
+#
+#             request = json.loads(receive_encrypted_data(last_received_raw_data, fernet).decode('utf-8'))
+#             log(f"Room {room_id} received a request: {request}")
+#             # identify request type
+#             if request["action"] == "unlock":
+#                 if request["room_password"] == room["room_password"]:
+#                     body = {"code": 200, "message": "Password is valid"}
+#                 else:
+#                     body = {"code": 401, "message": "Invalid password!"}
+#                 send_request_encrypted(json.dumps(body).encode('utf-8'), fernet, client_socket)
+#                 # client_socket.sendall(json.dumps(body).encode('utf-8'))
+#             elif request["action"] == "join":
+#                 username = request["username"]
+#                 username_exists = False
+#                 for user in room["users"].values():
+#                     if user["username"] == username:
+#                         body = {"code": 400, "message": "Username already exists!"}
+#                         log("Username exists!!!")
+#                         send_request_encrypted(json.dumps(body).encode('utf-8'), fernet, client_socket)
+#                         username_exists = True
+#                         break
+#                 if username_exists:
+#                     continue
+#                 this_client_id = request["user_id"]
+#                 room["users"][request["user_id"]] = {"user_id": this_client_id, "username": request["username"],
+#                                                      "socket": client_socket, "fernet": fernet}
+#                 body = {"code": 200, "message": "join success", "room_welcome_message": room["room_welcome_message"]}
+#                 send_request_encrypted(json.dumps(body).encode('utf-8'), fernet, client_socket)
+#                 body = {"code": 200, "messages": room["messages"]}
+#                 send_request_encrypted(json.dumps(body).encode('utf-8'), fernet, client_socket)
+#                 # client_socket.sendall(json.dumps(body).encode('utf-8'))
+#                 # Broadcast the message to others about the user's join (client itself excluded)
+#                 broadcast_message(room, this_client_id, f'User {request["username"]} joined the room!')
+#
+#             elif request["action"] == "send_message":
+#                 # Broadcast the message to others (client itself excluded)
+#                 broadcast_message(room, this_client_id,
+#                                   f'{room["users"][this_client_id]["username"]}: {request["message"]}')
+#             elif request["action"] == "command":
+#                 log(f"Command received: {request['action']}")
+#                 # Execute commands
+#                 if request["command"] == "help":
+#                     body = {"code": 200, "action": "receive_message",
+#                             "message": f"List of available commands: {available_commands}"}
+#                     # client_socket.sendall(json.dumps(body).encode('utf-8'))
+#                     send_request_encrypted(json.dumps(body).encode('utf-8'), fernet, client_socket)
+#                 elif request['command'] == "username":
+#                     oldUsername = room['users'][this_client_id]['username']
+#                     newUsername = request['value']
+#                     room['users'][this_client_id]['username'] = newUsername
+#                     broadcast_message(room, "", f"{oldUsername} changed their username to {newUsername}")
+#                 elif request['command'] == "quit":
+#                     body = {"code": 200, "action": "leave_room",
+#                             "message": "You left the room!"}
+#                     # client_socket.sendall(json.dumps(body).encode('utf-8'))
+#                     send_request_encrypted(json.dumps(body).encode('utf-8'), fernet, client_socket)
+#                     broadcast_message(room, this_client_id,
+#                                       f"User {room['users'][this_client_id]['username']} left the room!")
+#                     del room["users"][this_client_id]
+#                     client_socket.close()
+#                     room_timeout_handler(room_id, room_socket, room["room_timeout"])
+#                     return
+#                 else:
+#                     body = {"code": 400, "action": "receive_message",
+#                             "message": "Command is not recognized, use /help to get a list of available commands!"}
+#                     # client_socket.sendall(json.dumps(body).encode('utf-8'))
+#                     send_request_encrypted(json.dumps(body).encode('utf-8'), fernet, client_socket)
+#
+#         except Exception:
+#             # If it is not json, then it is an encryption key
+#             if not last_received_raw_data:
+#                 pass
+#             else:
+#                 # Receive encrypted key from client
+#                 encrypted_message = last_received_raw_data
+#                 # Decrypt message with private key
+#                 key = private_key.decrypt(
+#                     encrypted_message,
+#                     padding.OAEP(
+#                         mgf=padding.MGF1(algorithm=hashes.SHA256()),
+#                         algorithm=hashes.SHA256(),
+#                         label=None
+#                     )
+#                 )
+#                 log(f"Decrypted key: {key}")
+#                 fernet = Fernet(key)
+#                 log(f"Key received: {fernet}")
+
+
 def room_timeout_handler(room_id, room_socket, timeout):
     log(f"{len(_rooms[room_id]['users'])} users in the room. Timeout: {timeout}, {room_id} room, {room_socket}")
     if timeout == 0:
@@ -295,6 +504,7 @@ def room_timeout_handler(room_id, room_socket, timeout):
             log(f"Room {room_id} is empty, closing it.")
             room_socket.close()
             del _rooms[room_id]
+
 
 def start_room(room_id, port, timeout):
     # CREATE A NEW ROOM
@@ -310,10 +520,11 @@ def start_room(room_id, port, timeout):
             log(f"ROOM: Connection established with {client_address}")
             # handle each client request in a separate thread
             room_handler = threading.Thread(target=room_client_handler, args=(
-                room_id, client_socket,room_socket))  # Create a new thread to handle the connection (parallelism)
+                room_id, client_socket, room_socket))  # Create a new thread to handle the connection (parallelism)
             room_handler.start()
         except Exception as e:
             break
+
 
 def start_lobby():
     # SERVER LOBBY LOGIC

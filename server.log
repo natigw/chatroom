@@ -67,3 +67,91 @@
 [2024-11-07 00:51:02] Room TEST1 is empty, closing it.
 [2024-11-07 00:51:27] LOBBY: Connection established with ('192.168.0.104', 60150)
 [2024-11-07 00:51:27] Lobby received: {'action': 'list'}
+[2024-11-07 01:08:56] LOBBY: Connection established with ('192.168.0.104', 60663)
+[2024-11-07 01:09:01] Lobby received: {'action': 'list'}
+[2024-11-07 01:15:47] LOBBY: Connection established with ('192.168.0.104', 60851)
+[2024-11-07 01:15:56] LOBBY: Connection established with ('192.168.0.104', 60854)
+[2024-11-07 01:16:01] Lobby received: {'action': 'list'}
+[2024-11-07 01:16:17] LOBBY: Connection established with ('192.168.0.104', 60874)
+[2024-11-07 01:16:21] Lobby received: {'action': 'list'}
+[2024-11-07 01:16:29] LOBBY: Connection established with ('192.168.0.104', 60879)
+[2024-11-07 01:16:33] Lobby received: {'action': 'list'}
+[2024-11-07 01:16:58] LOBBY: Connection established with ('192.168.0.104', 60892)
+[2024-11-07 01:17:03] Lobby received: {'action': 'list'}
+[2024-11-07 01:17:22] LOBBY: Connection established with ('192.168.0.104', 60903)
+[2024-11-07 01:17:25] Lobby received: {'action': 'list'}
+[2024-11-07 01:17:33] LOBBY: Connection established with ('192.168.0.104', 60908)
+[2024-11-07 01:17:36] Lobby received: {'action': 'list'}
+[2024-11-07 01:17:44] LOBBY: Connection established with ('192.168.0.104', 60913)
+[2024-11-07 01:52:15] Started listening on 192.168.0.104:3169
+[2024-11-07 01:52:15] Started listening on 192.168.0.104:3171
+[2024-11-07 01:52:15] Started listening on 192.168.0.104:3170
+[2024-11-07 01:52:15] 0 users in the room. Timeout: 20, TEST1 room, <socket.socket fd=856, family=2, type=1, proto=0, laddr=('192.168.0.104', 3171)>
+[2024-11-07 01:52:15] 0 users in the room. Timeout: 0, general room, <socket.socket fd=840, family=2, type=1, proto=0, laddr=('192.168.0.104', 3170)>
+[2024-11-07 01:52:21] Started listening on 192.168.0.104:3169
+[2024-11-07 01:52:21] Started listening on 192.168.0.104:3171
+[2024-11-07 01:52:21] Started listening on 192.168.0.104:3170
+[2024-11-07 01:52:21] 0 users in the room. Timeout: 20, TEST1 room, <socket.socket fd=752, family=2, type=1, proto=0, laddr=('192.168.0.104', 3171)>
+[2024-11-07 01:52:21] 0 users in the room. Timeout: 0, general room, <socket.socket fd=908, family=2, type=1, proto=0, laddr=('192.168.0.104', 3170)>
+[2024-11-07 01:52:41] Room TEST1 is empty, closing it.
+[2024-11-07 01:53:24] Started listening on 192.168.0.104:3169
+[2024-11-07 01:53:24] Started listening on 192.168.0.104:3170
+[2024-11-07 01:53:24] Started listening on 192.168.0.104:3171
+[2024-11-07 01:53:24] 0 users in the room. Timeout: 0, general room, <socket.socket fd=884, family=2, type=1, proto=0, laddr=('192.168.0.104', 3170)>
+[2024-11-07 01:53:24] 0 users in the room. Timeout: 20, TEST1 room, <socket.socket fd=908, family=2, type=1, proto=0, laddr=('192.168.0.104', 3171)>
+[2024-11-07 01:53:44] Room TEST1 is empty, closing it.
+[2024-11-07 01:57:10] Started listening on 192.168.0.104:3169
+[2024-11-07 01:57:10] Started listening on 192.168.0.104:3170
+[2024-11-07 01:57:10] Started listening on 192.168.0.104:3171
+[2024-11-07 01:57:10] 0 users in the room. Timeout: 0, general room, <socket.socket fd=872, family=2, type=1, proto=0, laddr=('192.168.0.104', 3170)>
+[2024-11-07 01:57:10] 0 users in the room. Timeout: 20, TEST1 room, <socket.socket fd=888, family=2, type=1, proto=0, laddr=('192.168.0.104', 3171)>
+[2024-11-07 01:57:30] Room TEST1 is empty, closing it.
+[2024-11-07 10:31:44] Started listening on 192.168.0.104:3169
+[2024-11-07 10:31:44] Started listening on 192.168.0.104:3170
+[2024-11-07 10:31:44] 0 users in the room. Timeout: 0, general room, <socket.socket fd=816, family=2, type=1, proto=0, laddr=('192.168.0.104', 3170)>
+[2024-11-07 10:31:44] Started listening on 192.168.0.104:3171
+[2024-11-07 10:31:44] 0 users in the room. Timeout: 20, TEST1 room, <socket.socket fd=916, family=2, type=1, proto=0, laddr=('192.168.0.104', 3171)>
+[2024-11-07 10:32:04] Room TEST1 is empty, closing it.
+[2024-11-07 10:32:04] LOBBY: Connection established with ('192.168.0.104', 52854)
+[2024-11-07 10:33:29] LOBBY: Connection established with ('192.168.0.104', 52889)
+[2024-11-07 10:34:23] LOBBY: Connection established with ('192.168.0.104', 52916)
+[2024-11-07 10:34:24] Lobby received: {}
+[2024-11-07 11:00:52] LOBBY: Connection established with ('192.168.0.104', 64412)
+[2024-11-07 11:00:53] Lobby received: {'action': 'list_users'}
+[2024-11-07 11:00:53] Lobby received: {}
+[2024-11-07 11:03:40] LOBBY: Connection established with ('192.168.0.104', 64483)
+[2024-11-07 11:03:45] Lobby received: {'action': 'list_users'}
+[2024-11-07 11:03:45] Lobby received: {}
+[2024-11-07 11:03:59] LOBBY: Connection established with ('192.168.0.104', 64492)
+[2024-11-07 11:04:37] LOBBY: Connection established with ('192.168.0.104', 64509)
+[2024-11-07 11:04:38] Lobby received: {'action': 'list_users'}
+[2024-11-07 11:04:38] Lobby received: {}
+[2024-11-07 11:06:13] LOBBY: Connection established with ('192.168.0.104', 64549)
+[2024-11-07 11:06:14] Lobby received: {'action': 'list_users'}
+[2024-11-07 11:06:14] Lobby received: {}
+[2024-11-07 11:07:08] LOBBY: Connection established with ('192.168.0.104', 64574)
+[2024-11-07 11:07:19] Lobby received: {'action': 'list_users'}
+[2024-11-07 11:07:19] Lobby received: {}
+[2024-11-07 11:12:04] Started listening on 192.168.0.104:3169
+[2024-11-07 11:12:04] Started listening on 192.168.0.104:3170
+[2024-11-07 11:12:04] Started listening on 192.168.0.104:3171
+[2024-11-07 11:12:04] 0 users in the room. Timeout: 0, general room, <socket.socket fd=888, family=2, type=1, proto=0, laddr=('192.168.0.104', 3170)>
+[2024-11-07 11:12:04] 0 users in the room. Timeout: 20, TEST1 room, <socket.socket fd=916, family=2, type=1, proto=0, laddr=('192.168.0.104', 3171)>
+[2024-11-07 11:12:13] LOBBY: Connection established with ('192.168.0.104', 64722)
+[2024-11-07 11:12:14] Lobby received: {'action': 'list_users'}
+[2024-11-07 11:12:14] Lobby received: {}
+[2024-11-07 11:12:24] Room TEST1 is empty, closing it.
+[2024-11-07 11:12:26] LOBBY: Connection established with ('192.168.0.104', 64728)
+[2024-11-07 11:12:28] Lobby received: {'action': 'list_users'}
+[2024-11-07 11:40:08] Started listening on 192.168.0.104:3169
+[2024-11-07 11:40:08] Started listening on 192.168.0.104:3171
+[2024-11-07 11:40:08] Started listening on 192.168.0.104:3170
+[2024-11-07 11:40:08] 0 users in the room. Timeout: 20, TEST1 room, <socket.socket fd=884, family=2, type=1, proto=0, laddr=('192.168.0.104', 3171)>
+[2024-11-07 11:40:08] 0 users in the room. Timeout: 0, general room, <socket.socket fd=480, family=2, type=1, proto=0, laddr=('192.168.0.104', 3170)>
+[2024-11-07 11:40:28] Room TEST1 is empty, closing it.
+[2024-11-07 11:47:44] Started listening on 192.168.0.104:3169
+[2024-11-07 11:47:44] Started listening on 192.168.0.104:3170
+[2024-11-07 11:47:44] Started listening on 192.168.0.104:3171
+[2024-11-07 11:47:44] 0 users in the room. Timeout: 20, TEST1 room, <socket.socket fd=896, family=2, type=1, proto=0, laddr=('192.168.0.104', 3171)>
+[2024-11-07 11:47:44] 0 users in the room. Timeout: 0, general room, <socket.socket fd=872, family=2, type=1, proto=0, laddr=('192.168.0.104', 3170)>
+[2024-11-07 11:48:04] Room TEST1 is empty, closing it.

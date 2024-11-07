@@ -6,6 +6,7 @@ import json
 import uuid
 import os
 import msvcrt
+import hashlib
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -13,7 +14,6 @@ from cryptography.hazmat.primitives import hashes
 from matplotlib.streamplot import OutOfBounds
 
 fernet = None
-
 
 class CustomInput:
     def __init__(self):
@@ -69,7 +69,7 @@ class CustomInput:
 # 1. Server action [CREATE] =  '{ "action":"create", "room_name":"some name chosen by admin", "room_welcome_message":"some message set by admin", "room_id":"NSFW", "room_owner":"admin username", "room_password":"MyDirtyRoom123"}'
 # 2. Server action [DELETE] =  TODO()
 # 3. Server action [JOIN] =  REQUEST: {"action":"join", "user_id":user_id, "username":username}, RESPONSE: {"code": 200, "message":"join success", "room_welcome_message":"welcome, {username}!"}
-# 4. Server action [LIST] =  REQUEST: { "action":"list"}, RESPONSE: { "code": 200, "message":"list success", "data":[{"room_name":"Farid's room", "room_id":"room's id", "room_owner":"farid_admin0"}, {}, {}]}
+# 4. Server action [LIST] =  REQUEST: { "action":"list"}, RESPONSE: { "code": 200, "message":"list rooms success", "data":[{"room_name":"Farid's room", "room_id":"room's id", "room_owner":"farid_admin0"}, {}, {}]}
 
 # ROOM SCHEMAS:
 # 1. Room action [SEND_MESSAGE] = REQUEST: {"action":"send_message", "user_id":user_id, "message": "hi guys!"}
@@ -142,11 +142,11 @@ def create_client_socket(server_port):
 
 # SERVER ACTIONS
 def list_rooms():
-    # SEND A LIST ACTION REQUEST: {"action":"list"}
+    # SEND A LIST ACTION REQUEST: {"action":"list_rooms"}
     os.system('cls')
-    body = {"action": "list"}
+    body = {"action": "list_rooms"}
     client_socket.sendall(json.dumps(body).encode('utf-8'))
-    # GET AN ACTION RESPONSE: { "code": 200, "message":"list success", "data":[{"room_name":"Farid's room", "id":"room's id", "owner":"farid_admin0"}, {}, {}]}
+    # GET AN ACTION RESPONSE: { "code": 200, "message":"list rooms success", "data":[{"room_name":"Farid's room", "id":"room's id", "owner":"farid_admin0"}, {}, {}]}
     response = json.loads(client_socket.recv(1024).decode('utf-8'))
     # Handle error case here
     if response["code"] != 200: return print(response["message"])
@@ -158,6 +158,23 @@ def list_rooms():
         print(f"This room is {room['room_type']}")
         print(f"Room ID: {room['room_id']}")
         print(f"User count: {room['user_count']}")
+        print("---------------------------------------------------------")
+    return response['data']
+
+def list_users():
+    # SEND A LIST ACTION REQUEST: {"action":"list_users"}
+    os.system('cls')
+    body = {"action": "list_users"}
+    client_socket.sendall(json.dumps(body).encode('utf-8'))
+    # GET AN ACTION RESPONSE: { "code": 200,  "message":"list users success", "data":[{"username":"natig" #(lowercased), "password":"1234"}, {}, {}]}
+    response = json.loads(client_socket.recv(1024).decode('utf-8'))
+    # Handle error case here
+    if response["code"] != 200: return print(response["message"])
+    # Handle success case here
+    users = response['data']
+    print(f"\nNFV Messenger users:\n")
+    for user in users:
+        print(f"User: {user['username']}")
         print("---------------------------------------------------------")
     return response['data']
 
@@ -351,24 +368,93 @@ def launch_user_mode(rooms):
             return
     print("No such room exists")
 
+def get_hash(string):
+    byte_string = string.encode('utf-8')
+    hash_object = hashlib.sha256(byte_string)
+    # Get the hexadecimal representation of the hash
+    hash_hex = hash_object.hexdigest()
+
+    return hash_hex
+
 
 def launch_lobby(is_first_time):
     global client_socket
     global user_mode
     if is_first_time:
         print("Welcome to NFV Messenger!")
-        user_mode = input("You want to continue as [user/admin]: ")
     else:
         client_socket.close()
+
     # Connect to the server lobby (static port: 3169)
     client_socket = create_client_socket(3169)
-    # LIST ROOMS INITIALLY
-    rooms = list_rooms()
-    if user_mode == "admin":
-        launch_admin_mode(rooms)
 
-    elif user_mode == "user":
-        launch_user_mode(rooms)
+    while True:
+        print("To be able to continue you need an account.")
+        choice = input("Do you have an account: login (1) or register (2): ")
+        if choice == "1":
+            client_login()
+            break
+        elif choice == "2":
+            client_register()
+            break
+        else:
+            print("Invalid input!")
+
+    while True:
+        choice = input("\nDo you want to send a direct message (1) or to join a room (2): ")
+        if choice == "1":
+            print("List of NFV users:")
+            list_users()
+            while True:
+                receiver = input("Enter user you want to send message: ")
+                if receiver not in users:
+                    print("User not found!\n")
+                else: break
+            print(receiver)
+            #TODO -> sender server kimi olacaq, receiver birbasa bunun portuna qosulsun
+            #print("Waiting the receiver to come online...")
+            #print("But you can still type your message, receiver will see it whenever they connects.")
+            break
+        elif choice == "2":
+            if is_first_time:
+                user_mode = input("You want to continue as [user/admin]: ").lower()
+            rooms = list_rooms()
+            if user_mode == "admin":
+                launch_admin_mode(rooms)
+            elif user_mode == "user":
+                launch_user_mode(rooms)
+            break
+        else:
+            print("Please input 1 or 2.")
+
+users = list_users()
+
+def client_login():
+    while True:
+        username = input("Enter your username: ").lower()
+        password = input("Enter your password: ")
+        if username == users["user"]["username"]:
+
+
+            break
+        else:
+            print("Wrong username or password!\n")
+
+def client_register():
+    while True:
+        username = input("Enter a username: ").lower()
+        if username == users["user"]["username"]:
+            print("Username already taken! Please choose another one.\n")
+        else: break
+    password = input("Enter a password: ")
+    user_data = {
+        "username" : username,
+        "password" : get_hash(password),
+        "date_joined" : time.strftime("%Y-%m-%d %H:%M:%S")
+    }
+    data = {"action": "add_user", "data": user_data}
+    client_socket.sendall(json.dumps(data).encode('utf-8'))
+
 
 
 if __name__ == "__main__":
