@@ -4,6 +4,8 @@ import threading
 import time
 import rsa
 
+
+
 def type_print(message, typing_speed=0.05):
     for char in message:
         sys.stdout.write(char)

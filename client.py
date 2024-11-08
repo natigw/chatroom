@@ -15,6 +15,7 @@ from matplotlib.streamplot import OutOfBounds
 
 fernet = None
 
+
 class CustomInput:
     def __init__(self):
         self.input_buffer = ""
@@ -116,6 +117,7 @@ def clear_last_line():
 # def on_disconnect():
 host: str = ''  # Server's IP
 
+
 def listen_incoming_messages(callback):
     try:
         while True:
@@ -129,6 +131,7 @@ def listen_incoming_messages(callback):
     except ConnectionResetError:
         print("This room is deleted by the owner!")
         # launch_lobby(False)
+
 
 def create_client_socket(server_port):
     global host
@@ -160,6 +163,7 @@ def list_rooms():
         print(f"User count: {room['user_count']}")
         print("---------------------------------------------------------")
     return response['data']
+
 
 def list_users():
     # SEND A LIST ACTION REQUEST: {"action":"list_users"}
@@ -297,6 +301,7 @@ def public_room_logic(admin_data):
         message = sys_input.input("\n>> ")
         send_message(message)
 
+
 def launch_admin_mode(rooms):
     global admin_username
     if not admin_username:
@@ -368,6 +373,7 @@ def launch_user_mode(rooms):
             return
     print("No such room exists")
 
+
 def get_hash(string):
     byte_string = string.encode('utf-8')
     hash_object = hashlib.sha256(byte_string)
@@ -387,18 +393,19 @@ def launch_lobby(is_first_time):
 
     # Connect to the server lobby (static port: 3169)
     client_socket = create_client_socket(3169)
-
-    while True:
-        print("To be able to continue you need an account.")
-        choice = input("Do you have an account: login (1) or register (2): ")
-        if choice == "1":
-            client_login()
-            break
-        elif choice == "2":
-            client_register()
-            break
-        else:
-            print("Invalid input!")
+    users = list_users()
+    if is_first_time:
+        while True:
+            print("To be able to continue you need an account.")
+            choice = input("Do you have an account: login (1) or register (2): ")
+            if choice == "1":
+                client_login()
+                break
+            elif choice == "2":
+                client_register()
+                break
+            else:
+                print("Invalid input!")
 
     while True:
         choice = input("\nDo you want to send a direct message (1) or to join a room (2): ")
@@ -409,15 +416,15 @@ def launch_lobby(is_first_time):
                 receiver = input("Enter user you want to send message: ")
                 if receiver not in users:
                     print("User not found!\n")
-                else: break
+                else:
+                    break
             print(receiver)
-            #TODO -> sender server kimi olacaq, receiver birbasa bunun portuna qosulsun
-            #print("Waiting the receiver to come online...")
-            #print("But you can still type your message, receiver will see it whenever they connects.")
+            # TODO -> sender server kimi olacaq, receiver birbasa bunun portuna qosulsun
+            # print("Waiting the receiver to come online...")
+            # print("But you can still type your message, receiver will see it whenever they connects.")
             break
         elif choice == "2":
-            if is_first_time:
-                user_mode = input("You want to continue as [user/admin]: ").lower()
+            user_mode = input("You want to continue as [user/admin]: ").lower()
             rooms = list_rooms()
             if user_mode == "admin":
                 launch_admin_mode(rooms)
@@ -427,35 +434,36 @@ def launch_lobby(is_first_time):
         else:
             print("Please input 1 or 2.")
 
-users = list_users()
 
 def client_login():
+    users = list_users()
     while True:
         username = input("Enter your username: ").lower()
         password = input("Enter your password: ")
-        if username == users["user"]["username"]:
-
-
+        if username in [user['username'] for user in users]:
+            launch_lobby(False)
             break
         else:
             print("Wrong username or password!\n")
 
+
 def client_register():
+    users = list_users()
     while True:
         username = input("Enter a username: ").lower()
-        if username == users["user"]["username"]:
+        if username in [user['username'] for user in users]:
             print("Username already taken! Please choose another one.\n")
-        else: break
+        else:
+            break
     password = input("Enter a password: ")
     user_data = {
-        "username" : username,
-        "password" : get_hash(password),
-        "date_joined" : time.strftime("%Y-%m-%d %H:%M:%S")
+        "username": username,
+        "password": get_hash(password),
+        "date_joined": time.strftime("%Y-%m-%d %H:%M:%S")
     }
     data = {"action": "add_user", "data": user_data}
     client_socket.sendall(json.dumps(data).encode('utf-8'))
-
-
+    launch_lobby(False)
 
 if __name__ == "__main__":
     try:
