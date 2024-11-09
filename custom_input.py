@@ -32,7 +32,6 @@ class CustomInput:
                             sys.stdout.write(char.decode('utf-8'))
                         else:
                             sys.stdout.write(mask)
-                        sys.stdout.write(char.decode('utf-8'))
                         sys.stdout.flush()
 
     def input(self, prompt="", mask=""):
