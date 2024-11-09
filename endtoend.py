@@ -19,7 +19,7 @@ choice = input("Do you want to Host(1) or to Connect(2): ")
 
 if choice == "1":
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(('192.168.83.150', 9999))
+    server.bind(('192.168.2.6', 9999))
     server.listen(1)
     type_print("\nServer has run successfully!\n", 0.02)
     client, _ = server.accept()
@@ -29,7 +29,7 @@ if choice == "1":
 
 elif choice == "2":
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect(('192.168.83.150', 9999))
+    client.connect(('192.168.2.6', 9999))
     type_print("\nConnection established with Partner!\n", 0.02)
     type_print("   *** End-to-End Encryption ***   \n")
 

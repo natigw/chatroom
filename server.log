@@ -220,3 +220,10 @@
 [2024-11-09 16:25:49] Decrypted key: b'8ksIfNuEKQJOv7wb6vj7wcrXC4oDdLpdjZum99E-O_s='
 [2024-11-09 16:25:49] Key received: <cryptography.fernet.Fernet object at 0x000002C49EB9F4D0>
 [2024-11-09 16:25:50] LOBBY: Connection established with ('192.168.2.6', 62823)
+[2024-11-09 16:59:16] LOBBY: Connection established with ('192.168.2.6', 63864)
+[2024-11-09 16:59:17] Lobby received: {'action': 'list_users'}
+[2024-11-09 16:59:49] LOBBY: Connection established with ('192.168.2.6', 63877)
+[2024-11-09 17:00:33] LOBBY: Connection established with ('192.168.2.6', 63905)
+[2024-11-09 17:00:34] Lobby received: {'action': 'list_users'}
+[2024-11-09 17:00:41] LOBBY: Connection established with ('192.168.2.6', 63910)
+[2024-11-09 17:00:46] Lobby received: {'action': 'list_users'}

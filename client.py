@@ -411,7 +411,7 @@ def client_login():
     users = get_users()
     while True:
         username = input("Enter your username: ").lower()
-        password = input("Enter your password: ")
+        password = sys_input.input("Enter your password: ", mask='*')
         password = get_hash(password)
         user = next((user for user in users if user['username'] == username and user['password'] == password), None)
         if user:
