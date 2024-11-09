@@ -1,25 +1,28 @@
+import hashlib
+import json
+import os
 import socket
 import sys
-import time
 import threading
-import json
+import time
 import uuid
-import os
-import msvcrt
-import hashlib
+
+import rsa
 from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives import hashes
+from rsa import PublicKey
+
 from custom_input import CustomInput
 
 fernet = None
 
 # SERVER SCHEMAS:
-# 1. Server action [CREATE] =  '{ "action":"create", "room_name":"some name chosen by admin", "room_welcome_message":"some message set by admin", "room_id":"NSFW", "room_owner":"admin username", "room_password":"MyDirtyRoom123"}'
-# 2. Server action [DELETE] =  TODO()
-# 3. Server action [JOIN] =  REQUEST: {"action":"join", "user_id":user_id, "username":username}, RESPONSE: {"code": 200, "message":"join success", "room_welcome_message":"welcome, {username}!"}
-# 4. Server action [LIST] =  REQUEST: { "action":"list"}, RESPONSE: { "code": 200, "message":"list rooms success", "data":[{"room_name":"Farid's room", "room_id":"room's id", "room_owner":"farid_admin0"}, {}, {}]}
+# 1. Server action [CREATE] = {"action":"create", "room_name":"general", "room_welcome_message":"some message", "room_id":"NFV", "room_owner":"admin", "room_password":"admin123"}
+# 2. Server action [DELETE] = REQUEST: {"action":"delete", "room_name":"general"}, RESPONSE: {"code": 200, "message":"deletion success"}
+# 3. Server action [JOIN]  =  REQUEST: {"action":"join", "user_id":user_id, "username":username}, RESPONSE: {"code": 200, "message":"join success", "room_welcome_message":"welcome, {username}!"}
+# 4. Server action [LIST]  =  REQUEST: {"action":"list_rooms"}, RESPONSE: { "code": 200, "message":"list rooms success", "data":[{"room_name":"general", "room_id":"NFV", "room_owner":"admin"}, {}, {}]}
 
 # ROOM SCHEMAS:
 # 1. Room action [SEND_MESSAGE] = REQUEST: {"action":"send_message", "user_id":user_id, "message": "hi guys!"}
@@ -32,6 +35,13 @@ user_id = str(uuid.uuid4())
 user_mode: str
 admin_username: str = None
 current_user: str = None
+
+HOSTNAME = socket.gethostname()
+IP_ADDRESS = socket.gethostbyname(HOSTNAME)
+PORT = 9999
+client: socket
+public_partner: PublicKey
+public_key_endtoend, private_key_endtoend = rsa.newkeys(1024), rsa.newkeys(1024)
 
 
 def type_print(message, typing_speed=0.05):
@@ -95,8 +105,8 @@ def create_client_socket(server_port):
     global host
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     if not host:
-        host = "192.168.2.6"#input("Enter server IP: ")  # Server's IP
-    port = server_port  # Server's port
+        host = input("Enter server IP: ")
+    port = server_port
     client_socket.connect((host, port))
     return client_socket
 
@@ -107,7 +117,7 @@ def list_rooms():
     os.system('cls')
     body = {"action": "list_rooms"}
     client_socket.sendall(json.dumps(body).encode('utf-8'))
-    # GET AN ACTION RESPONSE: { "code": 200, "message":"list rooms success", "data":[{"room_name":"Farid's room", "id":"room's id", "owner":"farid_admin0"}, {}, {}]}
+    # GET AN ACTION RESPONSE: { "code": 200, "message":"list rooms success", "data":[{"room_name":"Farid's room", "id":"room's id", "owner":"farid_admin"}, {}, {}]}
     response = json.loads(client_socket.recv(1024).decode('utf-8'))
     # Handle error case here
     if response["code"] != 200: return print(response["message"])
@@ -115,7 +125,7 @@ def list_rooms():
     rooms = response['data']
     print(f"\nAvailable rooms:\n")
     for room in rooms:
-        print(f"Room: {room['room_name']}")
+        type_print(f"Room: {room['room_name']}", 0.04)
         print(f"This room is {room['room_type']}")
         print(f"Room ID: {room['room_id']}")
         if len(room['users']) == 0:
@@ -137,7 +147,7 @@ def get_users():
     os.system('cls')
     body = {"action": "list_users"}
     client_socket.sendall(json.dumps(body).encode('utf-8'))
-    # GET AN ACTION RESPONSE: { "code": 200,  "message":"list users success", "data":[{"username":"natig" #(lowercased), "password":"1234"}, {}, {}]}
+    # GET AN ACTION RESPONSE: { "code": 200,  "message":"list users success", "data":[{"username":"natig", "password":"hash of password"}, {}, {}]}
     response = json.loads(client_socket.recv(1024).decode('utf-8'))
     # Handle error case here
     if response["code"] != 200: return print(response["message"])
@@ -265,7 +275,7 @@ def public_room_logic(room, admin_data):
     while True:
         time.sleep(0.1)
         message = sys_input.input("\n>> ")
-        send_message(message)
+        send_message_ete(message)
 
 
 def launch_admin_mode(rooms):
@@ -276,7 +286,7 @@ def launch_admin_mode(rooms):
     choice = input("Please, pick an action [create/delete/join]:\n")
 
     if choice == "create":
-        # { "action":"create", "room_name":"some name chosen by admin", "room_welcome_message":"some message set by admin", "room_id":"NSFW", "room_owner":"admin username", "room_password":"MyDirtyRoom123"}
+        # { "action":"create", "room_name":"general", "room_welcome_message":"some message", "room_id":"1", "room_owner":"admin", "room_password":"admin123"}
         room_id = input("Please, input a room id that others will use to join: ")
         while room_id in [room['room_id'] for room in rooms]:
             print("Room id already exists, please choose another one.")
@@ -331,19 +341,20 @@ def join_room(room, admin_data=None):
 
 
 def launch_user_mode(rooms):
-    room_id = input("Please enter a room id from the list above to join: ")
-    for room in rooms:
-        if room["room_id"] == room_id:
-            join_room(room)
-            return
-    print("No such room exists")
+    while True:
+        type_print("\nPlease enter a room id from the list above to join:", 0.04)
+        room_id = input()
+        for room in rooms:
+            if room["room_id"] == room_id:
+                join_room(room)
+                return
+        print("\nNo such room exists\n")
 
 
 def get_hash(string):
     byte_string = string.encode('utf-8')
     hash_object = hashlib.sha256(byte_string)
-    # Get the hexadecimal representation of the hash
-    hash_hex = hash_object.hexdigest()
+    hash_hex = hash_object.hexdigest()  # hexadecimal representation of the hash
 
     return hash_hex
 
@@ -353,7 +364,7 @@ def launch_lobby(is_first_time):
     global user_mode
     global current_user
     if is_first_time:
-        print("Welcome to NFV Messenger!")
+        type_print("\nWelcome to NFV Messenger!\n\n")
     else:
         client_socket.close()
 
@@ -361,38 +372,43 @@ def launch_lobby(is_first_time):
     client_socket = create_client_socket(3169)
     if is_first_time:
         while True:
-            print("To be able to continue you need an account.")
-            choice = input("Do you have an account: login (1) or register (2): ")
+            type_print("\nTo be able to continue you need an account.", 0.03)
+            choice = input("Do you have an account: login (1), register (2), or credential update (3): ")
             if choice == "1":
                 client_login()
                 break
             elif choice == "2":
                 client_register()
                 break
+            elif choice == "3":
+                client_credential_update()
             else:
                 print("Invalid input!")
 
     while True:
-        choice = input("\nDo you want to send a direct message (1) or to join a room (2): ")
+        type_print("\nDo you want to send a direct message (1) or to join a room (2): ", 0.02)
+        choice = input()
         if choice == "1":
             users = get_users()
             print("NFV Messenger users:\n")
             for user in users:
-                print(f"User: {user['username']}")
-                print("---------------------------------------------------------")
+                type_print(f"User: {user['username']}", 0.01)
+                print("------------------------------------------------------------")
             while True:
-                receiver = input("Enter user you want to send message('exit' to navigate back): ")
+                type_print("\n\nEnter user you want to send message('exit' to navigate back):", 0.02)
+                receiver = input()
                 if receiver == "exit":
                     launch_lobby(False)
                     return
+                elif receiver == current_user:
+                    type_print("\n *** You cannot send a message to yourself! *** ", 0.01)
                 elif receiver not in [user['username'] for user in users]:
                     print("User not found!\n")
                 else:
                     break
-            type_print("\nWaiting the receiver to come online...")
-            type_print("But you can still type your message, receiver will see it whenever they connects.")
-            # TODO -> sender server kimi olacaq, receiver birbasa bunun portuna qosulsun
-
+            endtoend()
+            threading.Thread(target=send_message_ete, args=(client,)).start()
+            threading.Thread(target=receive_message_ete, args=(client,)).start()
             return
         elif choice == "2":
             user_mode = input("You want to continue as [user/admin]: ").lower()
@@ -409,17 +425,19 @@ def launch_lobby(is_first_time):
 def client_login():
     global current_user
     users = get_users()
+    type_print("Sign in to your NFV account.\n", 0.03)
     while True:
         username = input("Enter your username: ").lower()
         password = sys_input.input("Enter your password: ", mask='*')
         password = get_hash(password)
         user = next((user for user in users if user['username'] == username and user['password'] == password), None)
         if user:
+            type_print("\n\n\n *** Login successful! *** \n\n", 0.02)
             current_user = username
             launch_lobby(False)
             break
         else:
-            print("Wrong username or password!\n")
+            print("\nWrong username or password!\n")
 
 
 def client_register():
@@ -431,7 +449,7 @@ def client_register():
             print("Username already taken! Please choose another one.\n")
         else:
             break
-    password = input("Enter a password: ")
+    password = sys_input.input("Enter a password: ", mask='*')
     user_data = {
         "username": username,
         "password": get_hash(password),
@@ -439,8 +457,112 @@ def client_register():
     }
     data = {"action": "add_user", username: user_data}
     client_socket.sendall(json.dumps(data).encode('utf-8'))
+    type_print("\n\nUser account has been created successfully!\n", 0.03)
     current_user = username
     launch_lobby(False)
+
+
+def client_credential_update():
+    global current_user
+    users = get_users()
+
+    while True:
+        username = input("\nEnter your username: ").lower()
+        if username not in [user['username'] for user in users]:
+            print("This user has not registered!\n")
+        else:
+            old_password = sys_input.input("Enter the old password: ", mask='*')
+            old_password = get_hash(old_password)
+            user = next((user for user in users if user['username'] == username and user['password'] == old_password),
+                        None)
+            if user:
+                while True:
+                    new_password = sys_input.input("\nSet a new password: ", mask='*')
+                    if new_password == old_password:
+                        print("The new password cannot be same as the old!\n")
+                    else:
+                        break
+                break
+            else:
+                print("\nIncorrect password!\n")
+    updated_user_data = {
+        "username": username,
+        "password": get_hash(new_password),
+        "date_joined": user['date_joined']  # preserve the original join date
+    }
+    data = {"action": "add_user", username: updated_user_data}
+    client_socket.sendall(json.dumps(data).encode('utf-8'))
+    print("\nAccount password has been changed successfully!\n")
+    current_user = username
+    client_login()
+
+
+def endtoend():
+    global client
+    global public_partner
+    while True:
+        choice = input("Are you Sender(1) or Receiver(2), or to navigate back (exit): ")
+        type_print("\nWaiting the receiver to come online...")
+        # type_print("But you can still type your message, receiver will see it whenever they connects.")
+
+        if choice == "1":
+            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server.bind((IP_ADDRESS, PORT))
+            server.listen(1)
+            os.system('cls')
+            type_print("\nServer has run successfully!\n", 0.02)
+            client, _ = server.accept()
+
+            # Exchange public keys
+            client.send(public_key_endtoend.save_pkcs1("PEM"))
+            public_partner = rsa.PublicKey.load_pkcs1(client.recv(1024))
+
+        elif choice == "2":
+            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            ip = input("Enter Sender's IP address: ")
+            port = input("Enter Sender's Port number: ")
+            client.connect((ip, port))
+            os.system('cls')
+            type_print("\nConnection established with Partner!\n", 0.02)
+            type_print("   *** End-to-End Encryption ***   \n")
+
+            # Exchange public keys
+            public_partner = rsa.PublicKey.load_pkcs1(client.recv(1024))
+            client.send(public_key_endtoend.save_pkcs1("PEM"))
+
+        elif choice == "exit":
+            launch_lobby(False)
+            return
+        else:
+            print("Wrong choice!")
+
+
+def send_message_ete(c):
+    while True:
+        message = input("\n")
+        if message == "/quit":
+            c.send("[End of Connection]".encode())
+            type_print("\n\n GoodBye! ")
+            time.sleep(3)
+            os.system('cls')
+            type_print("Connection has been ended!")
+            return
+        c.send(message.encode())
+        # c.send(rsa.encrypt(message.encode(), public_partner))
+
+
+def receive_message_ete(c):
+    while True:
+        message = c.recv(1024).decode()
+        # message = rsa.decrypt(c.recv(1024), private_key).decode()
+        if message == "[End of Connection]":
+            type_print("\n\n Partner says GoodBye to you! ")
+            time.sleep(3)
+            os.system('cls')
+            type_print("\nConnection has been ended!")
+            return
+        print(f">> {message}")
+
 
 if __name__ == "__main__":
     try:

@@ -48,27 +48,27 @@ _rooms = {
         "room_type": "public",
         "room_port": 3170,
         "room_timeout": 0,
-        "users": {},  # "4124" : {"user_id": "4124", "username": "farid123", "socket": socket}
+        "users": {},   # {"farid" : {"user_id": "farid", "username": "farid123", "socket":socket}, {}, {}}
         "messages": []
     },
     "TEST1": {
         "room_name": "some name chosen by admin",
-        "room_welcome_message": "WELCOME TO MY VERY FIRST ROOM, ENJOY, NO RULES :D",
+        "room_welcome_message": "If you leave this private room., it may disappear :)",
         "room_id": "TEST1",
-        "room_owner": "admin username",
-        "room_password": "123",
+        "room_owner": "admin",
+        "room_password": "private",
         "room_type": "private",
         "room_port": 3171,
-        "room_timeout": 20,
-        "users": {},  # "4124" : {"user_id": "4124", "username": "farid123", "socket":socket}
+        "room_timeout": 60,
+        "users": {},
         "messages": []
     }
 }
 
-#add a new user, if exists update it
+# Add a new user, if exists update it
 def add_user(user_data):
-    #user_data = {"action" : "add_user", "natig": {"username": "natig", "password": "123", "date_joined": time.strftime('%Y-%m-%d %H:%M:%S')}}
-    #map user_data to {"natig": {"username": "natig", "password": "123", "date_joined": time.strftime('%Y-%m-%d %H:%M:%S')}}
+    #user_data = {"action" : "add_user", "natig": {"username": "natig", "password": "hash", "date_joined": "2024-11-09 10:44:07"}}
+    #map user_data to {"natig": {"username": "natig", "password": "hash", "date_joined": "2024-11-09 10:44:07"}}
     mapped_user_data = {key: value for key, value in user_data.items() if key != "action"}
     global _users
     _users.update(mapped_user_data)
@@ -79,7 +79,7 @@ def add_user(user_data):
 # _users = {
 #     "user_id1" : {
 #         "username" : "<USERNAME>", #unique,lowercased
-#         "password" : "<PASSWORD>",
+#         "password" : "<HASHED PASSWORD>",
 #         "date_joined" : "<DATE>"
 #     }
 # }
@@ -124,17 +124,17 @@ def get_users():
     ]
 
 
-# rooms = [{"room_name":"Farid's room 1", "room_id":"TEST1", "room_owner":"faridg", "is_private": False, "room_port": 3170}, {"room_name":"Farid's room special", "room_id":"FARIDG", "room_owner":"faridg", "is_private": False, "room_port": 3171}]
+# rooms = [{"room_name":"some name chosen by admin", "room_id":"TEST1", "room_owner":"admin", "is_private": True, "room_port": 3170}, {}, {}]
 server_lobby_socket = create_socket(3169)
 
 
 def list_rooms(client_socket):
-    # { "code": 200,  "message":"list rooms success", "data":[{"room_name":"Farid's room", "id":"room's id", "owner":"farid_admin0"}, {}, {}]}
+    # { "code": 200,  "message":"list rooms success", "data":[{"room_name":"Farid's room", "id":"room's id", "owner":"farid_admin"}, {}, {}]}
     response = {"code": 200, "message": "list rooms success", "data": get_rooms()}
     client_socket.sendall(json.dumps(response).encode('utf-8'))
 
 def list_users(client_socket):
-    # { "code": 200,  "message":"list users success", "data":[{"username":"natig" #(lowercased), "password":"1234"}, {}, {}]}
+    # { "code": 200,  "message":"list users success", "data":[{"username":"natig" #(lowercased), "password":"hash of password"}, {}, {}]}
     response = {"code": 200, "message": "list users success", "data": get_users()}
     client_socket.sendall(json.dumps(response).encode('utf-8'))
 
