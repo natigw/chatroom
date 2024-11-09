@@ -234,45 +234,6 @@ def receive_encrypted_data(data, fernet):
     return decrypted_data
 
 
-
-# def user_client_handler(user_id, client_socket):
-#     # Send public key to client once connected!
-#     client_socket.sendall(public_key_pem)
-#     log("Public key sent to client.")
-#
-#     user = _users[user_id]
-#     this_client_id: str
-#     last_received_raw_data = None
-#     fernet = None
-#     while True:
-#         try:
-#             request = json.loads(receive_encrypted_data(last_received_raw_data, fernet).decode('utf-8'))
-#             log(f"User {user_id} received a request: {request}")
-#             # identify request type
-#             if request["action"] == "add_user":
-#                 add_user(request)
-#
-#         except Exception:
-#             # If it is not json, then it is an encryption key
-#             if not last_received_raw_data:
-#                 pass
-#             else:
-#                 # Receive encrypted key from client
-#                 encrypted_message = last_received_raw_data
-#                 # Decrypt message with private key
-#                 key = private_key.decrypt(
-#                     encrypted_message,
-#                     padding.OAEP(
-#                         mgf=padding.MGF1(algorithm=hashes.SHA256()),
-#                         algorithm=hashes.SHA256(),
-#                         label=None
-#                     )
-#                 )
-#                 log(f"Decrypted key: {key}")
-#                 fernet = Fernet(key)
-#                 log(f"Key received: {fernet}")
-
-
 def room_client_handler(room_id, client_socket, room_socket):
     # Send public key to client once connected!
     client_socket.sendall(public_key_pem)

@@ -85,7 +85,6 @@ def clear_last_line():
 # def on_disconnect():
 host: str = ''  # Server's IP
 
-
 def listen_incoming_messages(callback):
     try:
         while True:
@@ -109,6 +108,26 @@ def create_client_socket(server_port):
     port = server_port
     client_socket.connect((host, port))
     return client_socket
+
+def init_encryption():
+    global fernet
+    # RECEIVE PUBLIC KEY
+    public_key_pem = client_socket.recv(4096)
+    public_key = serialization.load_pem_public_key(public_key_pem)
+    # GENERATE ENCRYPTION KEY
+    key = Fernet.generate_key()
+    fernet = Fernet(key)
+    # ENCRYPT THE KEY
+    encrypted_key = public_key.encrypt(
+        key,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+    # SEND ENCRYPTED KEY
+    client_socket.sendall(encrypted_key)
 
 
 # SERVER ACTIONS
@@ -141,7 +160,6 @@ def list_rooms():
         print("---------------------------------------------------------")
     return response['data']
 
-
 def get_users():
     # SEND A LIST ACTION REQUEST: {"action":"list_users"}
     os.system('cls')
@@ -168,28 +186,6 @@ def join_public_room(room, admin_data):
     # ENCRYPTED SESSION START
     public_room_logic(room, admin_data)
 
-
-def init_encryption():
-    global fernet
-    # RECEIVE PUBLIC KEY
-    public_key_pem = client_socket.recv(4096)
-    public_key = serialization.load_pem_public_key(public_key_pem)
-    # GENERATE ENCRYPTION KEY
-    key = Fernet.generate_key()
-    fernet = Fernet(key)
-    # ENCRYPT THE KEY
-    encrypted_key = public_key.encrypt(
-        key,
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
-        )
-    )
-    # SEND ENCRYPTED KEY
-    client_socket.sendall(encrypted_key)
-
-
 def join_private_room(room, admin_data):
     global client_socket
     # Disconnect from the lobby
@@ -200,7 +196,6 @@ def join_private_room(room, admin_data):
     init_encryption()
     # ENCRYPTED SESSION START
     private_room_logic(room, admin_data)
-
 
 def private_room_logic(room, admin_data):
     # Configure user first
@@ -216,7 +211,6 @@ def private_room_logic(room, admin_data):
 def send_request_encrypted(data):
     encrypted_data = fernet.encrypt(data)
     client_socket.sendall(encrypted_data)
-
 
 def receive_encrypted_data(data):
     decrypted_data = fernet.decrypt(data)
@@ -358,70 +352,6 @@ def get_hash(string):
 
     return hash_hex
 
-
-def launch_lobby(is_first_time):
-    global client_socket
-    global user_mode
-    global current_user
-    if is_first_time:
-        type_print("\nWelcome to NFV Messenger!\n\n")
-    else:
-        client_socket.close()
-
-    # Connect to the server lobby (static port: 3169)
-    client_socket = create_client_socket(3169)
-    if is_first_time:
-        while True:
-            type_print("\nTo be able to continue you need an account.", 0.03)
-            choice = input("Do you have an account: login (1), register (2), or credential update (3): ")
-            if choice == "1":
-                client_login()
-                break
-            elif choice == "2":
-                client_register()
-                break
-            elif choice == "3":
-                client_credential_update()
-            else:
-                print("Invalid input!")
-
-    while True:
-        type_print("\nDo you want to send a direct message (1) or to join a room (2): ", 0.02)
-        choice = input()
-        if choice == "1":
-            users = get_users()
-            print("NFV Messenger users:\n")
-            for user in users:
-                type_print(f"User: {user['username']}", 0.01)
-                print("------------------------------------------------------------")
-            while True:
-                type_print("\n\nEnter user you want to send message('exit' to navigate back):", 0.02)
-                receiver = input()
-                if receiver == "exit":
-                    launch_lobby(False)
-                    return
-                elif receiver == current_user:
-                    type_print("\n *** You cannot send a message to yourself! *** ", 0.01)
-                elif receiver not in [user['username'] for user in users]:
-                    print("User not found!\n")
-                else:
-                    break
-            endtoend()
-            threading.Thread(target=send_message_ete, args=(client,)).start()
-            threading.Thread(target=receive_message_ete, args=(client,)).start()
-            return
-        elif choice == "2":
-            user_mode = input("You want to continue as [user/admin]: ").lower()
-            rooms = list_rooms()
-            if user_mode == "admin":
-                launch_admin_mode(rooms)
-            elif user_mode == "user":
-                launch_user_mode(rooms)
-            break
-        else:
-            print("Please input 1 or 2.")
-
-
 def client_login():
     global current_user
     users = get_users()
@@ -536,7 +466,6 @@ def endtoend():
         else:
             print("Wrong choice!")
 
-
 def send_message_ete(c):
     while True:
         message = input("\n")
@@ -550,7 +479,6 @@ def send_message_ete(c):
         c.send(message.encode())
         # c.send(rsa.encrypt(message.encode(), public_partner))
 
-
 def receive_message_ete(c):
     while True:
         message = c.recv(1024).decode()
@@ -562,6 +490,70 @@ def receive_message_ete(c):
             type_print("\nConnection has been ended!")
             return
         print(f">> {message}")
+
+
+
+def launch_lobby(is_first_time):
+    global client_socket
+    global user_mode
+    global current_user
+    if is_first_time:
+        type_print("\nWelcome to NFV Messenger!\n\n")
+    else:
+        client_socket.close()
+
+    # Connect to the server lobby (static port: 3169)
+    client_socket = create_client_socket(3169)
+    if is_first_time:
+        while True:
+            type_print("\nTo be able to continue you need an account.", 0.03)
+            choice = input("Do you have an account: login (1), register (2), or credential update (3): ")
+            if choice == "1":
+                client_login()
+                break
+            elif choice == "2":
+                client_register()
+                break
+            elif choice == "3":
+                client_credential_update()
+            else:
+                print("Invalid input!")
+
+    while True:
+        type_print("\nDo you want to send a direct message (1) or to join a room (2): ", 0.02)
+        choice = input()
+        if choice == "1":
+            users = get_users()
+            print("NFV Messenger users:\n")
+            for user in users:
+                type_print(f"User: {user['username']}", 0.01)
+                print("------------------------------------------------------------")
+            while True:
+                type_print("\n\nEnter user you want to send message('exit' to navigate back):", 0.02)
+                receiver = input()
+                if receiver == "exit":
+                    launch_lobby(False)
+                    return
+                elif receiver == current_user:
+                    type_print("\n *** You cannot send a message to yourself! *** ", 0.01)
+                elif receiver not in [user['username'] for user in users]:
+                    print("User not found!\n")
+                else:
+                    break
+            endtoend()
+            threading.Thread(target=send_message_ete, args=(client,)).start()
+            threading.Thread(target=receive_message_ete, args=(client,)).start()
+            return
+        elif choice == "2":
+            user_mode = input("You want to continue as [user/admin]: ").lower()
+            rooms = list_rooms()
+            if user_mode == "admin":
+                launch_admin_mode(rooms)
+            elif user_mode == "user":
+                launch_user_mode(rooms)
+            break
+        else:
+            print("Please input 1 or 2.")
 
 
 if __name__ == "__main__":
