@@ -11,60 +11,9 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
-from matplotlib.streamplot import OutOfBounds
+from custom_input import CustomInput
 
 fernet = None
-
-
-class CustomInput:
-    def __init__(self):
-        self.input_buffer = ""
-        self.last_fully_entered_input = ""
-        self.done = False
-        self.lock = threading.Lock()
-
-    def _capture_input(self):
-        while not self.done:
-            time.sleep(0.05)
-            if msvcrt.kbhit():
-                char = msvcrt.getch()
-                if char == b'\r':  # Enter key
-                    with self.lock:
-                        self.done = True
-                elif char == b'\x08':  # Backspace
-                    with self.lock:
-                        if len(self.input_buffer) > 0:
-                            self.input_buffer = self.input_buffer[:-1]
-                            sys.stdout.write('\b \b')  # Erase last character
-                            sys.stdout.flush()
-                else:
-                    with self.lock:
-                        self.input_buffer += char.decode('utf-8')
-                        sys.stdout.write(char.decode('utf-8'))
-                        sys.stdout.flush()
-
-    def input(self, prompt=""):
-        self.last_fully_entered_input = self.input_buffer
-        self.input_buffer = ""
-        self.done = False
-
-        sys.stdout.write(prompt)
-        sys.stdout.flush()
-
-        capture_thread = threading.Thread(target=self._capture_input)
-        capture_thread.start()
-
-        while not self.done:
-            time.sleep(0.1)
-
-        capture_thread.join()
-
-        return self.input_buffer
-
-    def get_current_input(self):
-        with self.lock:
-            return self.input_buffer
-
 
 # SERVER SCHEMAS:
 # 1. Server action [CREATE] =  '{ "action":"create", "room_name":"some name chosen by admin", "room_welcome_message":"some message set by admin", "room_id":"NSFW", "room_owner":"admin username", "room_password":"MyDirtyRoom123"}'
