@@ -11,7 +11,7 @@ class CustomInput:
         self.done = False
         self.lock = threading.Lock()
 
-    def _capture_input(self):
+    def _capture_input(self, mask = ""):
         while not self.done:
             time.sleep(0.05)
             if msvcrt.kbhit():
@@ -28,6 +28,10 @@ class CustomInput:
                 else:
                     with self.lock:
                         self.input_buffer += char.decode('utf-8')
+                        if mask == "":
+                            sys.stdout.write(char.decode('utf-8'))
+                        else:
+                            sys.stdout.write(mask)
                         sys.stdout.write(char.decode('utf-8'))
                         sys.stdout.flush()
 
@@ -36,13 +40,10 @@ class CustomInput:
         self.input_buffer = ""
         self.done = False
 
-        if mask == "":
-            sys.stdout.write(prompt)
-        else:
-            sys.stdout.write(mask * len(prompt))
+        sys.stdout.write(prompt)
         sys.stdout.flush()
 
-        capture_thread = threading.Thread(target=self._capture_input)
+        capture_thread = threading.Thread(target=self._capture_input, args=(mask,))
         capture_thread.start()
 
         while not self.done:
