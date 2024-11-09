@@ -146,7 +146,7 @@ def create_client_socket(server_port):
     global host
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     if not host:
-        host = input("Enter server IP: ")  # Server's IP
+        host = "192.168.2.6"#input("Enter server IP: ")  # Server's IP
     port = server_port  # Server's port
     client_socket.connect((host, port))
     return client_socket
@@ -169,6 +169,15 @@ def list_rooms():
         print(f"Room: {room['room_name']}")
         print(f"This room is {room['room_type']}")
         print(f"Room ID: {room['room_id']}")
+        if len(room['users']) == 0:
+            print("No users in this room")
+        else:
+            print("Users in this room: ", end="")
+        for i, user in enumerate(room['users']):
+            if i == len(room['users']) - 1:
+                print(f"{user}")
+            else:
+                print(f"{user}", end=", ")
         print(f"User count: {room['user_count']}")
         print("---------------------------------------------------------")
     return response['data']
@@ -187,13 +196,6 @@ def get_users():
     users = response['data']
     return users
 
-def list_users():
-    users = get_users()
-    print(f"\nNFV Messenger users:\n")
-    for user in users:
-        print(f"User: {user['username']}")
-        print("---------------------------------------------------------")
-
 
 def join_public_room(room, admin_data):
     global client_socket
@@ -205,7 +207,7 @@ def join_public_room(room, admin_data):
     print("Connected to the room!")
     init_encryption()
     # ENCRYPTED SESSION START
-    public_room_logic(admin_data)
+    public_room_logic(room, admin_data)
 
 
 def init_encryption():
@@ -238,10 +240,10 @@ def join_private_room(room, admin_data):
     print("Connected to the room!")
     init_encryption()
     # ENCRYPTED SESSION START
-    private_room_logic(admin_data)
+    private_room_logic(room, admin_data)
 
 
-def private_room_logic(admin_data):
+def private_room_logic(room, admin_data):
     # Configure user first
     os.system('cls')  # clear the terminal
     room_password = input("Please enter room password: ")
@@ -249,7 +251,7 @@ def private_room_logic(admin_data):
     send_request_encrypted(json.dumps(data).encode('utf-8'))
     response = json.loads(receive_encrypted_data(client_socket.recv(2048)).decode('utf-8'))
     if response['code'] != 200: return print(response['message'])
-    public_room_logic(admin_data)
+    public_room_logic(room, admin_data)
 
 
 def send_request_encrypted(data):
@@ -262,7 +264,7 @@ def receive_encrypted_data(data):
     return decrypted_data
 
 
-def public_room_logic(admin_data):
+def public_room_logic(room, admin_data):
     # Configure user first
     os.system('cls')  # clear the terminal
     if admin_data:
@@ -271,6 +273,10 @@ def public_room_logic(admin_data):
         username = admin_data
     else:
         username = current_user
+        if username in room['users']:
+            print(f"You are already in the room! Please join another room or create a new one.")
+            time.sleep(1)
+            launch_lobby(False)
     data = {"action": "join", "user_id": user_id, "username": username}
     send_request_encrypted(json.dumps(data).encode('utf-8'))
     # client_socket.sendall(json.dumps(data).encode('utf-8'))
@@ -279,7 +285,6 @@ def public_room_logic(admin_data):
     if response['code'] != 200:
         print(response['message'])
         time.sleep(1)
-        public_room_logic(admin_data)
         return
 
     print(response['room_welcome_message'])
@@ -317,8 +322,7 @@ def public_room_logic(admin_data):
 def launch_admin_mode(rooms):
     global admin_username
     if not admin_username:
-        print("Please, validate your identity first")
-        admin_username = input("Enter your username: ")
+        admin_username = current_user
 
     choice = input("Please, pick an action [create/delete/join]:\n")
 
@@ -340,7 +344,7 @@ def launch_admin_mode(rooms):
         client_socket.sendall(json.dumps(data).encode('utf-8'))
         room_type = "private" if room_password != "" else "public"
         join_data = {"room_name": room_name, "room_id": room_id, "room_port": room_port, "room_owner": admin_username,
-                     "user_count": 0, "room_type": room_type}
+                     "user_count": 0, "room_type": room_type, "users": []}
         join_room(join_data, admin_username)
     elif choice == "delete":
         room_id = input("Please, enter the room id you want to delete: ")
@@ -406,7 +410,6 @@ def launch_lobby(is_first_time):
 
     # Connect to the server lobby (static port: 3169)
     client_socket = create_client_socket(3169)
-    users = get_users()
     if is_first_time:
         while True:
             print("To be able to continue you need an account.")
@@ -423,19 +426,25 @@ def launch_lobby(is_first_time):
     while True:
         choice = input("\nDo you want to send a direct message (1) or to join a room (2): ")
         if choice == "1":
-            print("List of NFV users:")
-            list_users()
+            users = get_users()
+            print("NFV Messenger users:\n")
+            for user in users:
+                print(f"User: {user['username']}")
+                print("---------------------------------------------------------")
             while True:
-                receiver = input("Enter user you want to send message: ")
-                if receiver not in users:
+                receiver = input("Enter user you want to send message('exit' to navigate back): ")
+                if receiver == "exit":
+                    launch_lobby(False)
+                    return
+                elif receiver not in [user['username'] for user in users]:
                     print("User not found!\n")
                 else:
                     break
-            print(receiver)
+            type_print("\nWaiting the receiver to come online...")
+            type_print("But you can still type your message, receiver will see it whenever they connects.")
             # TODO -> sender server kimi olacaq, receiver birbasa bunun portuna qosulsun
-            # print("Waiting the receiver to come online...")
-            # print("But you can still type your message, receiver will see it whenever they connects.")
-            break
+
+            return
         elif choice == "2":
             user_mode = input("You want to continue as [user/admin]: ").lower()
             rooms = list_rooms()
