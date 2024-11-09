@@ -1,12 +1,17 @@
 {
     "natig": {
         "username": "natig",
-        "password": "123",
-        "date_joined": "2024-11-07 11:06:59"
+        "password": "c892592254eb204c5096fae36b366a3bcb028dc7ba1bb30c32061f422ea5f435",
+        "date_joined": "2024-11-09 10:44:07"
     },
     "vusat": {
         "username": "vusat",
-        "password": "salam",
-        "date_joined": "2024-11-07 11:06:59"
+        "password": "a5bc62c7bdb883273f2916241fe7dde0cebbdaf158260d708587270e9c6411db",
+        "date_joined": "2024-11-09 11:00:23"
+    },
+    "farid": {
+        "username": "farid",
+        "password": "9b563ac174cfb399c256a983f7ec2fcbfc64f9d2c7e8848ed18934fa65b59e61",
+        "date_joined": "2024-11-09 11:14:32"
     }
 }

@@ -82,6 +82,15 @@ sys_input = CustomInput()
 user_id = str(uuid.uuid4())
 user_mode: str
 admin_username: str = None
+current_user: str = None
+
+
+def type_print(message, typing_speed=0.05):
+    for char in message:
+        sys.stdout.write(char)
+        sys.stdout.flush()
+        time.sleep(typing_speed)
+    print()  # For new line after the message
 
 
 def send_command(command, value):
@@ -165,7 +174,7 @@ def list_rooms():
     return response['data']
 
 
-def list_users():
+def get_users():
     # SEND A LIST ACTION REQUEST: {"action":"list_users"}
     os.system('cls')
     body = {"action": "list_users"}
@@ -176,11 +185,14 @@ def list_users():
     if response["code"] != 200: return print(response["message"])
     # Handle success case here
     users = response['data']
+    return users
+
+def list_users():
+    users = get_users()
     print(f"\nNFV Messenger users:\n")
     for user in users:
         print(f"User: {user['username']}")
         print("---------------------------------------------------------")
-    return response['data']
 
 
 def join_public_room(room, admin_data):
@@ -258,7 +270,7 @@ def public_room_logic(admin_data):
         print("You are now in the room!")
         username = admin_data
     else:
-        username = input("Please enter your username: ")
+        username = current_user
     data = {"action": "join", "user_id": user_id, "username": username}
     send_request_encrypted(json.dumps(data).encode('utf-8'))
     # client_socket.sendall(json.dumps(data).encode('utf-8'))
@@ -386,6 +398,7 @@ def get_hash(string):
 def launch_lobby(is_first_time):
     global client_socket
     global user_mode
+    global current_user
     if is_first_time:
         print("Welcome to NFV Messenger!")
     else:
@@ -393,7 +406,7 @@ def launch_lobby(is_first_time):
 
     # Connect to the server lobby (static port: 3169)
     client_socket = create_client_socket(3169)
-    users = list_users()
+    users = get_users()
     if is_first_time:
         while True:
             print("To be able to continue you need an account.")
@@ -436,11 +449,15 @@ def launch_lobby(is_first_time):
 
 
 def client_login():
-    users = list_users()
+    global current_user
+    users = get_users()
     while True:
         username = input("Enter your username: ").lower()
         password = input("Enter your password: ")
-        if username in [user['username'] for user in users]:
+        password = get_hash(password)
+        user = next((user for user in users if user['username'] == username and user['password'] == password), None)
+        if user:
+            current_user = username
             launch_lobby(False)
             break
         else:
@@ -448,7 +465,8 @@ def client_login():
 
 
 def client_register():
-    users = list_users()
+    global current_user
+    users = get_users()
     while True:
         username = input("Enter a username: ").lower()
         if username in [user['username'] for user in users]:
@@ -461,8 +479,9 @@ def client_register():
         "password": get_hash(password),
         "date_joined": time.strftime("%Y-%m-%d %H:%M:%S")
     }
-    data = {"action": "add_user", "data": user_data}
+    data = {"action": "add_user", username: user_data}
     client_socket.sendall(json.dumps(data).encode('utf-8'))
+    current_user = username
     launch_lobby(False)
 
 if __name__ == "__main__":

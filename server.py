@@ -67,9 +67,11 @@ _rooms = {
 
 #add a new user, if exists update it
 def add_user(user_data):
-    #user_data = {"natig": {"username": "natig", "password": "123", "date_joined": time.strftime('%Y-%m-%d %H:%M:%S')}}
+    #user_data = {"action" : "add_user", "natig": {"username": "natig", "password": "123", "date_joined": time.strftime('%Y-%m-%d %H:%M:%S')}}
+    #map user_data to {"natig": {"username": "natig", "password": "123", "date_joined": time.strftime('%Y-%m-%d %H:%M:%S')}}
+    mapped_user_data = {key: value for key, value in user_data.items() if key != "action"}
     global _users
-    _users.update(user_data)
+    _users.update(mapped_user_data)
     with open("users.json", "w") as file:
         json.dump(_users, file, indent=4)
     log(f"{user_data} added.")
@@ -282,13 +284,13 @@ def join(request, fernet, client_socket):
     username_exists = False
     for user in room["users"].values():
         if user["username"] == username:
-            body = {"code": 400, "message": "Username already exists!"}
-            log("Username exists!!!")
-            send_request_encrypted(json.dumps(body).encode('utf-8'), fernet, client_socket)
             username_exists = True
             break
-    # if username_exists:
-    #     continue
+    if username_exists:
+        body = {"code": 400, "message": "Username already exists!"}
+        log("Username exists!!!")
+        send_request_encrypted(json.dumps(body).encode('utf-8'), fernet, client_socket)
+        return
     this_client_id = request["user_id"]
     room["users"][request["user_id"]] = {"user_id": this_client_id, "username": request["username"],
                                          "socket": client_socket, "fernet": fernet}
